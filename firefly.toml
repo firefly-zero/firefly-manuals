@@ -1,0 +1,5 @@
+author_id = "gram"
+app_id = "manuals"
+author_name = "Gram"
+app_name = "Manuals"
+lang = "rust"
