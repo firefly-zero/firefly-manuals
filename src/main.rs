@@ -1,10 +1,15 @@
 #![no_std]
 #![no_main]
-use firefly_rust as ff;
+extern crate alloc;
+mod state;
+
+use crate::state::*;
+use firefly_rust::*;
+use firefly_types::manuals::*;
 
 #[unsafe(no_mangle)]
 extern "C" fn boot() {
-    // ...
+    load_state();
 }
 
 #[unsafe(no_mangle)]
@@ -14,15 +19,13 @@ extern "C" fn update() {
 
 #[unsafe(no_mangle)]
 extern "C" fn render() {
-    ff::clear_screen(ff::Color::White);
-    ff::draw_triangle(
-        ff::Point { x: 60, y: 10 },
-        ff::Point { x: 40, y: 40 },
-        ff::Point { x: 80, y: 40 },
-        ff::Style {
-            fill_color: ff::Color::LightGray,
-            stroke_color: ff::Color::DarkBlue,
-            stroke_width: 1,
-        },
-    );
+    let state = get_state();
+    if state.toc {
+        render_toc(state);
+    }
+}
+
+fn render_toc(state: &State) {
+    let theme = state.settings.theme;
+    firefly_ui::draw_bg(theme);
 }
