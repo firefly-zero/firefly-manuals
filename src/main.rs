@@ -54,10 +54,12 @@ fn handle_toc_input(state: &mut State) {
 }
 
 fn handle_page_input(state: &mut State) {
+    let font = state.font.as_font();
+    let h = i32::from(font.char_height());
     match state.input.get() {
-        firefly_ui::Input::Up => {}
-        firefly_ui::Input::Down => {}
-        firefly_ui::Input::Left => {}
+        firefly_ui::Input::Up => state.offset += h,
+        firefly_ui::Input::Down => state.offset -= h,
+        firefly_ui::Input::Left => state.offset = 5,
         firefly_ui::Input::Right => {}
         firefly_ui::Input::Select => {}
         firefly_ui::Input::Back => state.toc = true,
@@ -128,7 +130,7 @@ fn render_page(state: &State) {
             Block::H3(_) => todo!(),
             Block::P(_) | Block::Oli(_) | Block::Uli(_) => {
                 let words = line.words.as_ref().unwrap();
-                draw_words(words, theme, &font);
+                draw_words(words, state.offset, theme, &font);
             }
             Block::A(_) => todo!(),
             Block::Img(_) => todo!(),
@@ -138,7 +140,7 @@ fn render_page(state: &State) {
     }
 }
 
-fn draw_words(words: &[Word], theme: Theme, font: &Font) {
+fn draw_words(words: &[Word], offset: i32, theme: Theme, font: &Font) {
     for word in words {
         let mut color = theme.primary;
         match word.kind {
@@ -149,6 +151,7 @@ fn draw_words(words: &[Word], theme: Theme, font: &Font) {
             InlineKind::Icon => {}
             InlineKind::Br => return,
         }
-        draw_text(&word.content, font, word.point, color);
+        let point = Point::new(word.point.x, word.point.y + offset);
+        draw_text(&word.content, font, point, color);
     }
 }

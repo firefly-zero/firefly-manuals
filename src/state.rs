@@ -14,6 +14,7 @@ pub struct State {
     pub input: firefly_ui::InputManager,
     pub manual: Option<Manual>,
     pub lines: Option<Lines>,
+    pub offset: i32,
 }
 
 pub fn get_state() -> &'static mut State {
@@ -53,6 +54,7 @@ pub fn load_state() {
         input: firefly_ui::InputManager::new(),
         manual,
         lines: None,
+        offset: 5,
     };
     #[allow(static_mut_refs)]
     unsafe {
