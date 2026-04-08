@@ -25,6 +25,17 @@ pub fn wrap_lines(page: &Page, font: &Font) -> Lines {
     let mut lines = Lines::new();
     let h = i32::from(font.char_height());
     let mut point = Point::new(LEFT, h);
+
+    lines.push(Line {
+        point: Point::new(
+            (WIDTH - font.line_width_utf8(&page.title) as i32) / 2,
+            point.y,
+        ),
+        block: Block::H2(page.title.clone()),
+        words: None,
+    });
+    point.y += h * 2;
+
     for block in &page.content {
         match block {
             Block::H2(_) | Block::H3(_) | Block::A(_) => {
@@ -35,11 +46,12 @@ pub fn wrap_lines(page: &Page, font: &Font) -> Lines {
                     words: None,
                 };
                 lines.push(line);
-                point.y += h;
+                point.y += h * 2;
             }
             Block::P(inlines) => {
-                point.x = LEFT * 2;
-                wrap_line(&mut lines, block, &mut point, inlines, font)
+                point.x = LEFT;
+                wrap_line(&mut lines, block, &mut point, inlines, font);
+                point.y += h;
             }
             Block::Oli(inlines) => {
                 point.x = LEFT * 2;

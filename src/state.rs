@@ -54,7 +54,7 @@ pub fn load_state() {
         input: firefly_ui::InputManager::new(),
         manual,
         lines: None,
-        offset: 5,
+        offset: 0,
     };
     #[allow(static_mut_refs)]
     unsafe {

@@ -57,9 +57,16 @@ fn handle_page_input(state: &mut State) {
     let font = state.font.as_font();
     let h = i32::from(font.char_height());
     match state.input.get() {
-        firefly_ui::Input::Up => state.offset += h,
-        firefly_ui::Input::Down => state.offset -= h,
-        firefly_ui::Input::Left => state.offset = 5,
+        firefly_ui::Input::Up => {
+            state.offset += h;
+            if state.offset > 0 {
+                state.offset = 0;
+            }
+        }
+        firefly_ui::Input::Down => {
+            state.offset -= h;
+        }
+        firefly_ui::Input::Left => state.offset = 0,
         firefly_ui::Input::Right => {}
         firefly_ui::Input::Select => {}
         firefly_ui::Input::Back => state.toc = true,
@@ -99,34 +106,18 @@ fn render_toc(state: &State) {
 fn render_page(state: &State) {
     let theme = state.settings.theme;
     let font = state.font.as_font();
-    let h = i32::from(font.char_height());
-    let Some(manual) = state.manual.as_ref() else {
-        return;
-    };
-    let Some(page) = manual.pages.get(state.page) else {
-        return;
-    };
     let Some(lines) = &state.lines else {
         return;
     };
 
     clear_screen(theme.bg);
 
-    {
-        let mut point = Point::new(
-            (WIDTH - font.line_width_utf8(&page.title).cast_signed()) / 2,
-            1 + h,
-        );
-        if false {
-            point.x += 1;
-            point.y += 1;
-        }
-        draw_text(&page.title, &font, point, theme.accent);
-    };
-
     for line in lines {
         match &line.block {
-            Block::H2(_) => todo!(),
+            Block::H2(text) => {
+                let point = Point::new(line.point.x, line.point.y + state.offset);
+                draw_text(text, &font, point, theme.accent);
+            }
             Block::H3(_) => todo!(),
             Block::P(_) | Block::Oli(_) | Block::Uli(_) => {
                 let words = line.words.as_ref().unwrap();
