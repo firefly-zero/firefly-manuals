@@ -56,20 +56,31 @@ fn handle_toc_input(state: &mut State) {
 fn handle_page_input(state: &mut State) {
     let font = state.font.as_font();
     let h = i32::from(font.char_height());
+    let max_offset = if let Some(lines) = &state.lines
+        && let Some(last_line) = lines.last()
+    {
+        last_line.point.y
+    } else {
+        0
+    };
+
     match state.input.get() {
         firefly_ui::Input::Up => {
-            state.offset += h;
-            if state.offset > 0 {
-                state.offset = 0;
-            }
+            state.offset = i32::max(state.offset - h, 0);
         }
         firefly_ui::Input::Down => {
-            state.offset -= h;
+            state.offset = i32::min(state.offset + h, max_offset);
         }
-        firefly_ui::Input::Left => state.offset = 0,
-        firefly_ui::Input::Right => {}
+        firefly_ui::Input::Left => {
+            state.offset = 0;
+        }
+        firefly_ui::Input::Right => {
+            state.offset = i32::min(state.offset + HEIGHT, max_offset);
+        }
         firefly_ui::Input::Select => {}
-        firefly_ui::Input::Back => state.toc = true,
+        firefly_ui::Input::Back => {
+            state.toc = true;
+        }
         firefly_ui::Input::None => {}
     }
 }
@@ -115,7 +126,7 @@ fn render_page(state: &State) {
     for line in lines {
         match &line.block {
             Block::H2(text) => {
-                let point = Point::new(line.point.x, line.point.y + state.offset);
+                let point = Point::new(line.point.x, line.point.y - state.offset);
                 draw_text(text, &font, point, theme.accent);
             }
             Block::H3(_) => todo!(),
@@ -142,7 +153,7 @@ fn draw_words(words: &[Word], offset: i32, theme: Theme, font: &Font) {
             InlineKind::Icon => {}
             InlineKind::Br => return,
         }
-        let point = Point::new(word.point.x, word.point.y + offset);
+        let point = Point::new(word.point.x, word.point.y - offset);
         draw_text(&word.content, font, point, color);
     }
 }
