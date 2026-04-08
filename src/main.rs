@@ -48,7 +48,7 @@ fn handle_toc_input(state: &mut State) {
             let lines = wrap_lines(page, &font);
             state.lines = Some(lines);
         }
-        firefly_ui::Input::Back => {}
+        firefly_ui::Input::Back => quit(),
         firefly_ui::Input::None => {}
     }
 }
@@ -59,7 +59,7 @@ fn handle_page_input(state: &mut State) {
     let max_offset = if let Some(lines) = &state.lines
         && let Some(last_line) = lines.last()
     {
-        last_line.point.y
+        last_line.point.y - HEIGHT / 2
     } else {
         0
     };
