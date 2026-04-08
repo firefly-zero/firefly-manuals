@@ -117,6 +117,7 @@ fn render_toc(state: &State) {
 fn render_page(state: &State) {
     let theme = state.settings.theme;
     let font = state.font.as_font();
+    let h = font.char_height() as i32;
     let Some(lines) = &state.lines else {
         return;
     };
@@ -129,14 +130,37 @@ fn render_page(state: &State) {
                 let point = Point::new(line.point.x, line.point.y - state.offset);
                 draw_text(text, &font, point, theme.accent);
             }
-            Block::H3(_) => todo!(),
-            Block::P(_) | Block::Oli(_) | Block::Uli(_) => {
+            Block::H3(text) => {
+                let point = Point::new(line.point.x, line.point.y - state.offset);
+                draw_text(text, &font, point, theme.secondary);
+            }
+            Block::P(_) => {
+                let words = line.words.as_ref().unwrap();
+                draw_words(words, state.offset, theme, &font);
+            }
+            Block::Oli(_) => {
+                let words = line.words.as_ref().unwrap();
+                draw_words(words, state.offset, theme, &font);
+            }
+            Block::Uli(_) => {
                 let words = line.words.as_ref().unwrap();
                 draw_words(words, state.offset, theme, &font);
             }
             Block::A(_) => todo!(),
             Block::Img(_) => todo!(),
-            Block::Quote(_) => todo!(),
+            Block::Quote(_) => {
+                let words = line.words.as_ref().unwrap();
+                draw_words(words, state.offset, theme, &font);
+                for word in words {
+                    let x = line.point.x / 2;
+                    let y = word.point.y + 2 - state.offset;
+                    draw_line(
+                        Point::new(x, y - h),
+                        Point::new(x, y),
+                        LineStyle::new(theme.primary, 1),
+                    );
+                }
+            }
             Block::Qr(_) => todo!(),
         }
     }

@@ -56,14 +56,17 @@ pub fn wrap_lines(page: &Page, font: &Font) -> Lines {
             Block::Oli(inlines) => {
                 point.x = LEFT * 2;
                 wrap_line(&mut lines, block, &mut point, inlines, font);
+                point.y += h;
             }
             Block::Uli(inlines) => {
                 point.x = LEFT * 2;
                 wrap_line(&mut lines, block, &mut point, inlines, font);
+                point.y += h;
             }
             Block::Quote(inlines) => {
                 point.x = LEFT * 2;
                 wrap_line(&mut lines, block, &mut point, inlines, font);
+                point.y += h;
             }
             Block::Img(_) => point.y += h, // TODO
             Block::Qr(_) => point.y += h,  // TODO
