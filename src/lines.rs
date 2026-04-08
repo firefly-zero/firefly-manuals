@@ -1,5 +1,6 @@
 use alloc::{
     string::{String, ToString},
+    vec,
     vec::Vec,
 };
 use firefly_rust::*;
@@ -23,6 +24,7 @@ pub struct Word {
 
 pub fn wrap_lines(page: &Page, font: &Font) -> Lines {
     let mut lines = Lines::new();
+    let w = i32::from(font.char_width());
     let h = i32::from(font.char_height());
     let mut point = Point::new(LEFT, h);
 
@@ -36,7 +38,22 @@ pub fn wrap_lines(page: &Page, font: &Font) -> Lines {
     });
     point.y += h * 2;
 
+    let mut number = 0;
+    let mut unordered = false;
     for block in &page.content {
+        if matches!(block, Block::Oli(_)) {
+            number += 1;
+        } else if number != 0 {
+            number = 0;
+            point.y += h;
+        }
+        if matches!(block, Block::Uli(_)) {
+            unordered = true;
+        } else if unordered {
+            unordered = false;
+            point.y += h;
+        }
+
         match block {
             Block::H2(_) | Block::H3(_) | Block::A(_) => {
                 point.x = LEFT;
@@ -54,14 +71,22 @@ pub fn wrap_lines(page: &Page, font: &Font) -> Lines {
                 point.y += h;
             }
             Block::Oli(inlines) => {
-                point.x = LEFT * 2;
+                let word = Word {
+                    point: Point::new(LEFT, point.y),
+                    kind: InlineKind::Bold,
+                    content: alloc::format!("{}", number),
+                };
+                lines.push(Line {
+                    point: word.point,
+                    block: Block::P(Paragraph::new()),
+                    words: Some(vec![word]),
+                });
+                point.x = LEFT + w * 2;
                 wrap_line(&mut lines, block, &mut point, inlines, font);
-                point.y += h;
             }
             Block::Uli(inlines) => {
                 point.x = LEFT * 2;
                 wrap_line(&mut lines, block, &mut point, inlines, font);
-                point.y += h;
             }
             Block::Quote(inlines) => {
                 point.x = LEFT * 2;

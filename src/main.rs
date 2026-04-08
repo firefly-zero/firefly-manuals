@@ -151,10 +151,6 @@ fn render_page(state: &State) {
             Block::Oli(_) => {
                 let words = line.words.as_ref().unwrap();
                 draw_words(words, state.offset, theme, &font);
-                let x = line.point.x / 2 - 2;
-                let y = line.point.y - state.offset - 4;
-                let point = Point::new(x, y);
-                draw_circle(point, 5, Style::outlined(theme.accent, 1));
             }
             Block::Uli(_) => {
                 let words = line.words.as_ref().unwrap();
