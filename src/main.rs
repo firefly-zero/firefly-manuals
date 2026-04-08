@@ -30,17 +30,25 @@ fn handle_toc_input(state: &mut State) {
     };
     match state.input.get() {
         firefly_ui::Input::Up => {
+            state.offset = 0;
             if state.page > 0 {
                 state.page -= 1;
             }
         }
         firefly_ui::Input::Down => {
+            state.offset = 0;
             if state.page < manual.pages.len() - 1 {
                 state.page += 1;
             }
         }
-        firefly_ui::Input::Left => state.page = 0,
-        firefly_ui::Input::Right => state.page = manual.pages.len() - 1,
+        firefly_ui::Input::Left => {
+            state.offset = 0;
+            state.page = 0;
+        }
+        firefly_ui::Input::Right => {
+            state.offset = 0;
+            state.page = manual.pages.len() - 1;
+        }
         firefly_ui::Input::Select => {
             state.toc = false;
             let font = state.font.as_font();
@@ -59,7 +67,7 @@ fn handle_page_input(state: &mut State) {
     let max_offset = if let Some(lines) = &state.lines
         && let Some(last_line) = lines.last()
     {
-        last_line.point.y - HEIGHT / 2
+        i32::max(last_line.point.y - HEIGHT / 2, 0)
     } else {
         0
     };
