@@ -94,7 +94,14 @@ pub fn wrap_lines(page: &Page, font: &Font) -> Lines {
                 point.y += h;
             }
             Block::Img(_) => point.y += h, // TODO
-            Block::Qr(_) => point.y += h,  // TODO
+            Block::Qr(url) => {
+                lines.push(Line {
+                    point: Point::new(LEFT, point.y - h),
+                    block: Block::Qr(url.clone()),
+                    words: None,
+                });
+                point.y += 50 - h;
+            }
         }
     }
 

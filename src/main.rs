@@ -184,7 +184,8 @@ fn render_page(state: &State) {
                 }
             }
             Block::Qr(text) => {
-                draw_qr(text, line.point, theme.primary, theme.bg);
+                let point = Point::new(line.point.x, line.point.y - state.offset);
+                draw_qr(text, point, theme.primary, theme.bg);
             }
         }
     }
