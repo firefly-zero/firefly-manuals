@@ -128,11 +128,21 @@ fn render_page(state: &State) {
         match &line.block {
             Block::H2(text) => {
                 let point = Point::new(line.point.x, line.point.y - state.offset);
-                draw_text(text, &font, point, theme.accent);
+                draw_rect(
+                    Point::new(0, point.y - h + 2),
+                    Size::new(WIDTH, h + 2),
+                    Style::solid(theme.accent),
+                );
+                draw_text(text, &font, point, theme.bg);
             }
             Block::H3(text) => {
                 let point = Point::new(line.point.x, line.point.y - state.offset);
-                draw_text(text, &font, point, theme.secondary);
+                draw_rect(
+                    Point::new(0, point.y - h + 2),
+                    Size::new(WIDTH, h + 2),
+                    Style::solid(theme.primary),
+                );
+                draw_text(text, &font, point, theme.bg);
             }
             Block::P(_) => {
                 let words = line.words.as_ref().unwrap();
