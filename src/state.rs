@@ -8,12 +8,12 @@ static mut STATE: MaybeUninit<State> = MaybeUninit::uninit();
 
 pub struct State {
     pub font: FileBuf,
-    pub target: Option<(String, String)>,
     pub settings: Settings,
     pub toc: bool,
     pub page: usize,
     pub input: firefly_ui::InputManager,
     pub manual: Option<Manual>,
+    pub lines: Option<Lines>,
 }
 
 pub fn get_state() -> &'static mut State {
@@ -47,12 +47,12 @@ pub fn load_state() {
 
     let state = State {
         font,
-        target,
         settings,
         toc: n_pages != 1,
         page: 0,
         input: firefly_ui::InputManager::new(),
         manual,
+        lines: None,
     };
     #[allow(static_mut_refs)]
     unsafe {
