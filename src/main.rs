@@ -141,10 +141,18 @@ fn render_page(state: &State) {
             Block::Oli(_) => {
                 let words = line.words.as_ref().unwrap();
                 draw_words(words, state.offset, theme, &font);
+                let x = line.point.x / 2 - 2;
+                let y = line.point.y - state.offset - 4;
+                let point = Point::new(x, y);
+                draw_circle(point, 5, Style::outlined(theme.accent, 1));
             }
             Block::Uli(_) => {
                 let words = line.words.as_ref().unwrap();
                 draw_words(words, state.offset, theme, &font);
+                let x = line.point.x / 2 - 1;
+                let y = line.point.y - state.offset - 3;
+                let point = Point::new(x, y);
+                draw_circle(point, 3, Style::solid(theme.accent));
             }
             Block::A(_) => todo!(),
             Block::Img(_) => todo!(),
@@ -161,7 +169,9 @@ fn render_page(state: &State) {
                     );
                 }
             }
-            Block::Qr(_) => todo!(),
+            Block::Qr(text) => {
+                draw_qr(text, line.point, theme.primary, theme.bg);
+            }
         }
     }
 }
