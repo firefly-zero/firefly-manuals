@@ -133,9 +133,16 @@ fn render_page(state: &State) {
     clear_screen(theme.bg);
 
     for line in lines {
+        let offset = line.point.y - state.offset;
+        if offset < -50 {
+            continue;
+        }
+        if offset > HEIGHT + h {
+            continue;
+        }
         match &line.block {
             Block::H2(text) => {
-                let point = Point::new(line.point.x, line.point.y - state.offset);
+                let point = Point::new(line.point.x, offset);
                 draw_rect(
                     Point::new(0, point.y - h + 2),
                     Size::new(WIDTH, h + 2),
@@ -144,7 +151,7 @@ fn render_page(state: &State) {
                 draw_text(text, &font, point, theme.bg);
             }
             Block::H3(text) => {
-                let point = Point::new(line.point.x, line.point.y - state.offset);
+                let point = Point::new(line.point.x, offset);
                 draw_rect(
                     Point::new(0, point.y - h + 2),
                     Size::new(WIDTH, h + 2),
@@ -164,7 +171,7 @@ fn render_page(state: &State) {
                 let words = line.words.as_ref().unwrap();
                 draw_words(words, state.offset, theme, &font);
                 let x = line.point.x / 2 - 1;
-                let y = line.point.y - state.offset - 3;
+                let y = offset - 3;
                 let point = Point::new(x, y);
                 draw_circle(point, 3, Style::solid(theme.accent));
             }
@@ -184,7 +191,7 @@ fn render_page(state: &State) {
                 }
             }
             Block::Qr(text) => {
-                let point = Point::new(line.point.x, line.point.y - state.offset);
+                let point = Point::new(line.point.x, offset);
                 draw_qr(text, point, theme.primary, theme.bg);
             }
         }
