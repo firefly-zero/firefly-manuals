@@ -119,7 +119,21 @@ fn wrap_line(lines: &mut Lines, block: &Block, point: &mut Point, inlines: &[Inl
     let mut words = Vec::new();
 
     for inline in inlines {
-        for word in inline.content.split_ascii_whitespace() {
+        let mut first = true;
+        for word in inline.content.split(|c: char| c.is_ascii_whitespace()) {
+            // Handle whitespaces. There is always exatly one space
+            // between every `word`. The `word` might be empty if
+            // there are two spaces in a row or there is a trailing space.
+            // We don't check line wrap for empty words, which means
+            // spaces don't get wrapped around.
+            if !first {
+                point.x += w;
+            }
+            first = false;
+            if word.is_empty() {
+                continue;
+            }
+
             let word_w = font.line_width_utf8(word) as i32;
             if point.x + word_w > WIDTH {
                 line.words = Some(words);
@@ -138,7 +152,7 @@ fn wrap_line(lines: &mut Lines, block: &Block, point: &mut Point, inlines: &[Inl
                 kind: inline.kind,
                 content: word.to_string(),
             });
-            point.x += word_w + w;
+            point.x += word_w;
         }
     }
 
