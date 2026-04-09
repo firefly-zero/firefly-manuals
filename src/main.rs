@@ -111,10 +111,12 @@ fn render_toc(state: &State) {
         return;
     };
     let pressed = state.input.pressed();
-    firefly_ui::draw_cursor(state.page as u32, theme, &font, pressed, 0);
+    let hitting_wall = state.page == 0 || state.page == manual.pages.len() - 1;
+    let jitter = state.input.jitter(hitting_wall);
+    firefly_ui::draw_cursor(state.page as u32, theme, &font, pressed, jitter);
     for (page, i) in manual.pages.iter().zip(1..) {
         let mut point = Point::new(20, 12 + i * 13);
-        if pressed && i == state.page as i32 {
+        if pressed && i - 1 == state.page as i32 {
             point.x += 1;
             point.y += 1;
         }
