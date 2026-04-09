@@ -133,18 +133,22 @@ fn render_page(state: &State) {
     };
 
     clear_screen(theme.bg);
+    let jitter = state.input.jitter(state.offset == 0);
 
     for line in lines {
-        let offset = line.point.y - state.offset;
-        if offset < -50 {
+        let mut line_y = line.point.y - state.offset;
+        if line_y < -50 {
             continue;
         }
-        if offset > HEIGHT + h {
+        if line_y > HEIGHT + h {
             continue;
         }
+        line_y += i32::from(jitter);
+        let offset = state.offset - i32::from(jitter);
+
         match &line.block {
             Block::H2(text) => {
-                let point = Point::new(line.point.x, offset);
+                let point = Point::new(line.point.x, line_y);
                 draw_rect(
                     Point::new(0, point.y - h + 2),
                     Size::new(WIDTH, h + 2),
@@ -153,7 +157,7 @@ fn render_page(state: &State) {
                 draw_text(text, &font, point, theme.bg);
             }
             Block::H3(text) => {
-                let point = Point::new(line.point.x, offset);
+                let point = Point::new(line.point.x, line_y);
                 draw_rect(
                     Point::new(0, point.y - h + 2),
                     Size::new(WIDTH, h + 2),
@@ -163,17 +167,17 @@ fn render_page(state: &State) {
             }
             Block::P(_) => {
                 let words = line.words.as_ref().unwrap();
-                draw_words(words, state.offset, theme, &font);
+                draw_words(words, offset, theme, &font);
             }
             Block::Oli(_) => {
                 let words = line.words.as_ref().unwrap();
-                draw_words(words, state.offset, theme, &font);
+                draw_words(words, offset, theme, &font);
             }
             Block::Uli(_) => {
                 let words = line.words.as_ref().unwrap();
-                draw_words(words, state.offset, theme, &font);
+                draw_words(words, offset, theme, &font);
                 let x = line.point.x / 2 - 1;
-                let y = offset - 3;
+                let y = line_y - 3;
                 let point = Point::new(x, y);
                 draw_circle(point, 3, Style::solid(theme.accent));
             }
@@ -181,10 +185,10 @@ fn render_page(state: &State) {
             Block::Img(_) => todo!(),
             Block::Quote(_) => {
                 let words = line.words.as_ref().unwrap();
-                draw_words(words, state.offset, theme, &font);
+                draw_words(words, offset, theme, &font);
                 for word in words {
                     let x = line.point.x / 2;
-                    let y = word.point.y + 2 - state.offset;
+                    let y = word.point.y + 2 - offset;
                     draw_line(
                         Point::new(x, y - h),
                         Point::new(x, y),
@@ -193,7 +197,7 @@ fn render_page(state: &State) {
                 }
             }
             Block::Qr(text) => {
-                let point = Point::new(line.point.x, offset);
+                let point = Point::new(line.point.x, line_y);
                 draw_qr(text, point, theme.primary, theme.bg);
             }
         }
