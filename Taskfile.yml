@@ -16,4 +16,4 @@ tasks:
       - git push
       - git push --tags
       - gh release create --generate-notes {{.CLI_ARGS}}
-      - gh release upload {{.CLI_ARGS}} sys.badges.zip
+      - gh release upload {{.CLI_ARGS}} sys.manuals.zip
