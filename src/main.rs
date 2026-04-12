@@ -181,7 +181,12 @@ fn render_page(state: &State) {
                 draw_circle(point, 3, Style::solid(theme.accent));
             }
             Block::A(_) => todo!(),
-            Block::Img(_) => todo!(),
+            Block::Img(_) => {
+                if let Some(img) = line.image.as_ref() {
+                    let img = img.as_image();
+                    draw_image(&img, line.point);
+                }
+            }
             Block::Quote(_) => {
                 let words = line.words.as_ref().unwrap();
                 draw_words(words, offset, theme, &font);
