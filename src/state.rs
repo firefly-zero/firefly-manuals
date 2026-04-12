@@ -11,6 +11,11 @@ pub struct State {
     pub settings: Settings,
     pub input: firefly_ui::InputManager,
 
+    /// Full ID of the target app.
+    ///
+    /// Used for delayed loading of assets.
+    target: Option<(String, String)>,
+
     /// The parsed game manual.
     ///
     /// If None, the game has no manual.
@@ -47,7 +52,9 @@ impl State {
         self.toc = false;
         let font = self.font.as_font();
         let page = &manual.pages[self.page];
-        let lines = wrap_lines(page, &font);
+        let target = self.target.as_ref();
+        let target = target.map(|(a, b)| (a.as_str(), b.as_str()));
+        let lines = wrap_lines(page, &font, target);
         self.lines = Some(lines);
     }
 }
@@ -84,11 +91,13 @@ pub fn load_state() {
     let mut state = State {
         font,
         settings,
+        manual,
+        target,
+
         single_page: n_pages == 1,
         toc: true,
         page: 0,
         input: firefly_ui::InputManager::new(),
-        manual,
         lines: None,
         offset: 0,
     };
