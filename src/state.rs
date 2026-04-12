@@ -17,6 +17,20 @@ pub struct State {
     pub offset: i32,
 }
 
+impl State {
+    /// Open the currently selected page.
+    pub fn open_page(&mut self) {
+        let Some(manual) = self.manual.as_ref() else {
+            return;
+        };
+        self.toc = false;
+        let font = self.font.as_font();
+        let page = &manual.pages[self.page];
+        let lines = wrap_lines(page, &font);
+        self.lines = Some(lines);
+    }
+}
+
 pub fn get_state() -> &'static mut State {
     #[allow(static_mut_refs)]
     unsafe {
@@ -46,16 +60,19 @@ pub fn load_state() {
         0
     };
 
-    let state = State {
+    let mut state = State {
         font,
         settings,
-        toc: n_pages != 1,
+        toc: true,
         page: 0,
         input: firefly_ui::InputManager::new(),
         manual,
         lines: None,
         offset: 0,
     };
+    if n_pages == 1 {
+        state.open_page();
+    }
     #[allow(static_mut_refs)]
     unsafe {
         STATE.write(state)

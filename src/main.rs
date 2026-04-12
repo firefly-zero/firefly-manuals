@@ -49,13 +49,7 @@ fn handle_toc_input(state: &mut State) {
             state.offset = 0;
             state.page = manual.pages.len() - 1;
         }
-        firefly_ui::Input::Select => {
-            state.toc = false;
-            let font = state.font.as_font();
-            let page = &manual.pages[state.page];
-            let lines = wrap_lines(page, &font);
-            state.lines = Some(lines);
-        }
+        firefly_ui::Input::Select => state.open_page(),
         firefly_ui::Input::Back => quit(),
         firefly_ui::Input::None => {}
     }
