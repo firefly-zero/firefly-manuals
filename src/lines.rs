@@ -102,7 +102,9 @@ pub fn wrap_lines(page: &Page, font: &Font, target: Option<(&str, &str)>) -> Lin
                 if let Some((author_id, app_id)) = target {
                     let path = alloc::format!("roms/{author_id}/{app_id}/{name}");
                     if let Some(img) = sudo::load_file_buf(&path) {
+                        let img_w = i32::from(img.as_image().width());
                         let img_h = i32::from(img.as_image().height());
+                        point.x = (WIDTH - img_w) / 2;
                         let mut line = Line::new(point, Block::Img(String::new()));
                         line.image = Some(img);
                         lines.push(line);
