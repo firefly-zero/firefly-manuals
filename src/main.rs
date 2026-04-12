@@ -85,6 +85,7 @@ fn handle_page_input(state: &mut State) {
                 quit();
             } else {
                 state.toc = true;
+                state.lines = None;
             }
         }
         firefly_ui::Input::None => {}
@@ -207,6 +208,8 @@ fn draw_words(words: &[Word], offset: i32, theme: Theme, font: &Font) {
         let mut color = theme.primary;
         match word.kind {
             InlineKind::Plain => {}
+            // TODO: if Settings.contrast is true, use "primary" for background
+            // and "bg" for text.
             InlineKind::Bold => color = theme.accent,
             InlineKind::Italic => color = theme.secondary,
             InlineKind::Image => {}

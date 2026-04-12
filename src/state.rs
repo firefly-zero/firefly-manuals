@@ -9,12 +9,32 @@ static mut STATE: MaybeUninit<State> = MaybeUninit::uninit();
 pub struct State {
     pub font: FileBuf,
     pub settings: Settings,
-    pub single_page: bool,
-    pub toc: bool,
-    pub page: usize,
     pub input: firefly_ui::InputManager,
+
+    /// The parsed game manual.
+    ///
+    /// If None, the game has no manual.
     pub manual: Option<Manual>,
+
+    /// If true, the manual has only one page.
+    ///
+    /// Use to hide the Table of Contents.
+    pub single_page: bool,
+
+    /// If true, the Table of Contents is currently open.
+    ///
+    /// If false, the selected page is open instead.
+    pub toc: bool,
+
+    /// The index of the currently selected page.
+    pub page: usize,
+
+    /// The wrapped lines of the currently open page.
     pub lines: Option<Lines>,
+
+    /// OY offset from the page top to the screen top.
+    ///
+    /// In other words, this is the scroll position for the open page.
     pub offset: i32,
 }
 
