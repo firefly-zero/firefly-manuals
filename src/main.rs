@@ -81,7 +81,11 @@ fn handle_page_input(state: &mut State) {
         }
         firefly_ui::Input::Select => {}
         firefly_ui::Input::Back => {
-            state.toc = true;
+            if state.single_page {
+                quit();
+            } else {
+                state.toc = true;
+            }
         }
         firefly_ui::Input::None => {}
     }

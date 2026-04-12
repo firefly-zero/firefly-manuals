@@ -9,6 +9,7 @@ static mut STATE: MaybeUninit<State> = MaybeUninit::uninit();
 pub struct State {
     pub font: FileBuf,
     pub settings: Settings,
+    pub single_page: bool,
     pub toc: bool,
     pub page: usize,
     pub input: firefly_ui::InputManager,
@@ -63,6 +64,7 @@ pub fn load_state() {
     let mut state = State {
         font,
         settings,
+        single_page: n_pages == 1,
         toc: true,
         page: 0,
         input: firefly_ui::InputManager::new(),
@@ -70,7 +72,7 @@ pub fn load_state() {
         lines: None,
         offset: 0,
     };
-    if n_pages == 1 {
+    if state.single_page {
         state.open_page();
     }
     #[allow(static_mut_refs)]
