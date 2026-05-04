@@ -1,5 +1,7 @@
 #![no_std]
 #![no_main]
+#![deny(clippy::pedantic)]
+#![allow(clippy::cast_possible_truncation, clippy::cast_possible_wrap)]
 extern crate alloc;
 mod lines;
 mod state;
@@ -79,7 +81,6 @@ fn handle_page_input(state: &mut State) {
         firefly_ui::Input::Right => {
             state.offset = i32::min(state.offset + HEIGHT, max_offset);
         }
-        firefly_ui::Input::Select => {}
         firefly_ui::Input::Back => {
             if state.single_page {
                 quit();
@@ -88,7 +89,7 @@ fn handle_page_input(state: &mut State) {
                 state.lines = None;
             }
         }
-        firefly_ui::Input::None => {}
+        _ => {}
     }
 }
 
@@ -126,7 +127,7 @@ fn render_toc(state: &State) {
 fn render_page(state: &State) {
     let theme = state.settings.theme;
     let font = state.font.as_font();
-    let h = font.char_height() as i32;
+    let h = i32::from(font.char_height());
     let Some(lines) = &state.lines else {
         return;
     };
@@ -164,11 +165,7 @@ fn render_page(state: &State) {
                 );
                 draw_text(text, &font, point, theme.bg);
             }
-            Block::P(_) => {
-                let words = line.words.as_ref().unwrap();
-                draw_words(words, offset, theme, &font);
-            }
-            Block::Oli(_) => {
+            Block::P(_) | Block::Oli(_) => {
                 let words = line.words.as_ref().unwrap();
                 draw_words(words, offset, theme, &font);
             }
@@ -211,6 +208,7 @@ fn render_page(state: &State) {
 fn draw_words(words: &[Word], offset: i32, theme: Theme, font: &Font) {
     for word in words {
         let mut color = theme.primary;
+        #[expect(clippy::match_same_arms)]
         match word.kind {
             InlineKind::Plain => {}
             // TODO: if Settings.contrast is true, use "primary" for background

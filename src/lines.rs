@@ -81,7 +81,7 @@ pub fn wrap_lines(page: &Page, font: &Font, target: Option<(&str, &str)>) -> Lin
                 let word = Word {
                     point: Point::new(LEFT, point.y),
                     kind: InlineKind::Bold,
-                    content: alloc::format!("{}", number),
+                    content: alloc::format!("{number}"),
                 };
                 let mut line = Line::new(word.point, Block::P(Paragraph::new()));
                 line.words = Some(vec![word]);
