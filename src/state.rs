@@ -47,6 +47,7 @@ impl State {
     /// Open the currently selected page.
     pub fn open_page(&mut self) {
         let Some(manual) = self.manual.as_ref() else {
+            log_error("trying to open page without manual");
             return;
         };
         self.toc = false;
