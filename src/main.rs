@@ -58,7 +58,7 @@ fn handle_toc_input(state: &mut State) {
 }
 
 fn handle_page_input(state: &mut State) {
-    let font = state.font.as_font();
+    let font = &state.font;
     let h = i32::from(font.char_height());
     let max_offset = if let Some(lines) = &state.lines
         && let Some(last_line) = lines.last()
@@ -105,7 +105,7 @@ extern "C" fn render() {
 
 fn render_toc(state: &State) {
     let theme = state.settings.theme;
-    let font = state.font.as_font();
+    let font = &state.font;
     firefly_ui::draw_bg(theme);
     let Some(manual) = state.manual.as_ref() else {
         return;
@@ -113,20 +113,20 @@ fn render_toc(state: &State) {
     let pressed = state.input.pressed();
     let hitting_wall = state.page == 0 || state.page == manual.pages.len() - 1;
     let jitter = state.input.jitter(hitting_wall);
-    firefly_ui::draw_cursor(state.page as u32, theme, &font, pressed, jitter);
+    firefly_ui::draw_cursor(state.page as u32, theme, font, pressed, jitter);
     for (page, i) in manual.pages.iter().zip(1..) {
         let mut point = Point::new(20, 12 + i * 13);
         if pressed && i - 1 == state.page as i32 {
             point.x += 1;
             point.y += 1;
         }
-        draw_text(&page.title, &font, point, theme.primary);
+        draw_text(&page.title, font, point, theme.primary);
     }
 }
 
 fn render_page(state: &State) {
     let theme = state.settings.theme;
-    let font = state.font.as_font();
+    let font = &state.font;
     let h = i32::from(font.char_height());
     let Some(lines) = &state.lines else {
         return;
@@ -154,7 +154,7 @@ fn render_page(state: &State) {
                     Size::new(WIDTH, h + 2),
                     Style::solid(theme.accent),
                 );
-                draw_text(text, &font, point, theme.bg);
+                draw_text(text, font, point, theme.bg);
             }
             Block::H3(text) => {
                 let point = Point::new(line.point.x, line_y);
@@ -163,15 +163,15 @@ fn render_page(state: &State) {
                     Size::new(WIDTH, h + 2),
                     Style::solid(theme.primary),
                 );
-                draw_text(text, &font, point, theme.bg);
+                draw_text(text, font, point, theme.bg);
             }
             Block::P(_) | Block::Oli(_) => {
                 let words = line.words.as_ref().unwrap();
-                draw_words(words, offset, theme, &font);
+                draw_words(words, offset, theme, font);
             }
             Block::Uli(_) => {
                 let words = line.words.as_ref().unwrap();
-                draw_words(words, offset, theme, &font);
+                draw_words(words, offset, theme, font);
                 let x = line.point.x / 2 - 1;
                 let y = line_y - 3;
                 let point = Point::new(x, y);
@@ -180,13 +180,12 @@ fn render_page(state: &State) {
             Block::A(_) => todo!(),
             Block::Img(_) => {
                 if let Some(img) = line.image.as_ref() {
-                    let img = img.as_image();
-                    draw_image(&img, line.point);
+                    draw_image(img, line.point);
                 }
             }
             Block::Quote(_) => {
                 let words = line.words.as_ref().unwrap();
-                draw_words(words, offset, theme, &font);
+                draw_words(words, offset, theme, font);
                 for word in words {
                     let x = line.point.x / 2;
                     let y = word.point.y + 2 - offset;
@@ -205,7 +204,7 @@ fn render_page(state: &State) {
     }
 }
 
-fn draw_words(words: &[Word], offset: i32, theme: Theme, font: &Font) {
+fn draw_words(words: &[Word], offset: i32, theme: Theme, font: &FontBuf) {
     for word in words {
         let mut color = theme.primary;
         #[expect(clippy::match_same_arms)]

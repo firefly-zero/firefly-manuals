@@ -2,12 +2,13 @@ use crate::*;
 use alloc::string::String;
 use core::mem::MaybeUninit;
 use firefly_rust::*;
+use firefly_sudo::sudo;
 use firefly_types::Encode;
 
 static mut STATE: MaybeUninit<State> = MaybeUninit::uninit();
 
 pub struct State {
-    pub font: FileBuf,
+    pub font: FontBuf,
     pub settings: Settings,
     pub input: firefly_ui::InputManager,
 
@@ -51,11 +52,11 @@ impl State {
             return;
         };
         self.toc = false;
-        let font = self.font.as_font();
+        let font = &self.font;
         let page = &manual.pages[self.page];
         let target = self.target.as_ref();
         let target = target.map(|(a, b)| (a.as_str(), b.as_str()));
-        let lines = wrap_lines(page, &font, target);
+        let lines = wrap_lines(page, font, target);
         self.lines = Some(lines);
     }
 }
@@ -71,6 +72,7 @@ pub fn load_state() {
     let settings = get_settings(get_me());
     let encoding = settings.language.encoding();
     let font = load_file_buf(encoding).unwrap_or_else(|| load_file_buf("ascii").unwrap());
+    let font = font.into_font();
     let target = load_target();
     let manual = match &target {
         Some((author_id, app_id)) => load_manual(author_id, app_id),
@@ -114,14 +116,15 @@ pub fn load_state() {
 fn load_manual(author_id: &str, app_id: &str) -> Option<Manual> {
     let manual_path = alloc::format!("roms/{author_id}/{app_id}/_manual");
     let raw = sudo::load_file_buf(&manual_path)?;
+    let raw = raw.into_bytes();
     // TODO: hide pages based on badge and score conditions.
-    Manual::decode(raw.as_bytes()).ok()
+    Manual::decode(&raw).ok()
 }
 
 /// Read the ID of the app to be removed.
 fn load_target() -> Option<(String, String)> {
     let raw = load_file_buf("target")?;
-    let raw = raw.as_bytes();
+    let raw = raw.into_bytes();
     let raw = raw.trim_ascii();
     let raw = alloc::str::from_utf8(raw).ok()?;
     let (author, app) = split_by(raw, '.')?;

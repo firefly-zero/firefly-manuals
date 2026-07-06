@@ -4,6 +4,7 @@ use alloc::{
     vec::Vec,
 };
 use firefly_rust::*;
+use firefly_sudo::sudo;
 use firefly_types::manuals::*;
 
 const LEFT: i32 = 5;
@@ -14,7 +15,7 @@ pub struct Line {
     pub point: Point,
     pub block: Block,
     pub words: Option<Vec<Word>>,
-    pub image: Option<FileBuf>,
+    pub image: Option<ImageBuf>,
 }
 
 impl Line {
@@ -34,7 +35,7 @@ pub struct Word {
     pub content: String,
 }
 
-pub fn wrap_lines(page: &Page, font: &Font, target: Option<(&str, &str)>) -> Lines {
+pub fn wrap_lines(page: &Page, font: &FontBuf, target: Option<(&str, &str)>) -> Lines {
     let mut lines = Lines::new();
     let w = i32::from(font.char_width());
     let h = i32::from(font.char_height());
@@ -102,8 +103,9 @@ pub fn wrap_lines(page: &Page, font: &Font, target: Option<(&str, &str)>) -> Lin
                 if let Some((author_id, app_id)) = target {
                     let path = alloc::format!("roms/{author_id}/{app_id}/{name}");
                     if let Some(img) = sudo::load_file_buf(&path) {
-                        let img_w = i32::from(img.as_image().width());
-                        let img_h = i32::from(img.as_image().height());
+                        let img = img.into_image();
+                        let img_w = i32::from(img.width());
+                        let img_h = i32::from(img.height());
                         point.x = (WIDTH - img_w) / 2;
                         let mut line = Line::new(point, Block::Img(String::new()));
                         line.image = Some(img);
@@ -125,7 +127,13 @@ pub fn wrap_lines(page: &Page, font: &Font, target: Option<(&str, &str)>) -> Lin
     lines
 }
 
-fn wrap_line(lines: &mut Lines, block: &Block, point: &mut Point, inlines: &[Inline], font: &Font) {
+fn wrap_line(
+    lines: &mut Lines,
+    block: &Block,
+    point: &mut Point,
+    inlines: &[Inline],
+    font: &FontBuf,
+) {
     let h = i32::from(font.char_height());
     let w = i32::from(font.char_width());
     let mut line = Line::new(*point, block.clone());
